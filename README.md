@@ -1,4 +1,4 @@
-## 搭建UR5+robotiq2f_84+realsense D455 URDF
+## 搭建UR5+robotiq2f_85+realsense D455 URDF
 
 ### 环境配置
 1. 系统环境配置
@@ -9,9 +9,19 @@
 
 
 ### 编译
-
+1. 下载当前仓库代码
+```
+git clone git@github.com:WAI-f/ur_robotiq_realsense_description.git
+git submodule update --init --recursive
+```
+2. 编译代码
+```
+cd ur_robotiq_realsense_description
+colcon build
+```
 
 ### 可视化
+
 
 
 ### 说明
