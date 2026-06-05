@@ -1,0 +1,86 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://wiki.ros.org/xacro" name="ur5_robotiq85_d455">
+  <xacro:arg name="name" default="ur5_robotiq85_d455"/>
+  <xacro:arg name="tf_prefix" default=""/>
+
+  <xacro:arg name="ur_type" default="ur5"/>
+  <xacro:arg name="joint_limit_params" default="$(find ur_description)/config/$(arg ur_type)/joint_limits.yaml"/>
+  <xacro:arg name="kinematics_params" default="$(find ur_description)/config/$(arg ur_type)/default_kinematics.yaml"/>
+  <xacro:arg name="physical_params" default="$(find ur_description)/config/$(arg ur_type)/physical_parameters.yaml"/>
+  <xacro:arg name="visual_params" default="$(find ur_description)/config/$(arg ur_type)/visual_parameters.yaml"/>
+  <xacro:arg name="safety_limits" default="false"/>
+  <xacro:arg name="safety_pos_margin" default="0.15"/>
+  <xacro:arg name="safety_k_position" default="20"/>
+  <xacro:arg name="force_abs_paths" default="false"/>
+
+  <xacro:arg name="gripper_prefix" default="gripper_"/>
+  <xacro:arg name="gripper_name" default="RobotiqGripperHardwareInterface"/>
+  <xacro:arg name="gripper_mount_xyz" default="0 0 0"/>
+  <xacro:arg name="gripper_mount_rpy" default="0 0 0"/>
+  <xacro:arg name="include_gripper_ros2_control" default="false"/>
+  <xacro:arg name="use_fake_gripper_hardware" default="true"/>
+  <xacro:arg name="sim_gazebo" default="false"/>
+  <xacro:arg name="sim_isaac" default="false"/>
+
+  <xacro:arg name="camera_name" default="camera"/>
+  <xacro:arg name="camera_mount_xyz" default="0 0.1 0.05"/>
+  <xacro:arg name="camera_mount_rpy" default="0 -1.57079632679 1.57079632679"/>
+  <xacro:arg name="use_nominal_extrinsics" default="true"/>
+
+  <xacro:include filename="$(find ur_description)/urdf/ur_macro.xacro"/>
+  <xacro:include filename="$(find robotiq_description)/urdf/robotiq_2f_85_macro.urdf.xacro"/>
+  <xacro:include filename="$(find realsense2_description)/urdf/_d455.urdf.xacro"/>
+
+  <xacro:property name="ur_tf_prefix" value="$(arg tf_prefix)"/>
+  <xacro:property name="gripper_prefix_value" value="$(arg gripper_prefix)"/>
+  <xacro:property name="camera_name_value" value="$(arg camera_name)"/>
+
+  <link name="world"/>
+
+  <xacro:ur_robot
+    name="$(arg name)"
+    tf_prefix="$(arg tf_prefix)"
+    parent="world"
+    joint_limits_parameters_file="$(arg joint_limit_params)"
+    kinematics_parameters_file="$(arg kinematics_params)"
+    physical_parameters_file="$(arg physical_params)"
+    visual_parameters_file="$(arg visual_params)"
+    safety_limits="$(arg safety_limits)"
+    safety_pos_margin="$(arg safety_pos_margin)"
+    safety_k_position="$(arg safety_k_position)"
+    force_abs_paths="$(arg force_abs_paths)">
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </xacro:ur_robot>
+
+  <link name="${gripper_prefix_value}mount"/>
+  <joint name="${ur_tf_prefix}tool0_to_${gripper_prefix_value}mount" type="fixed">
+    <parent link="${ur_tf_prefix}tool0"/>
+    <child link="${gripper_prefix_value}mount"/>
+    <origin xyz="$(arg gripper_mount_xyz)" rpy="$(arg gripper_mount_rpy)"/>
+  </joint>
+
+  <xacro:robotiq_gripper
+    name="$(arg gripper_name)"
+    prefix="$(arg gripper_prefix)"
+    parent="${gripper_prefix_value}mount"
+    include_ros2_control="$(arg include_gripper_ros2_control)"
+    use_fake_hardware="$(arg use_fake_gripper_hardware)"
+    sim_gazebo="$(arg sim_gazebo)"
+    sim_isaac="$(arg sim_isaac)">
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </xacro:robotiq_gripper>
+
+  <link name="${camera_name_value}_mount"/>
+  <joint name="${ur_tf_prefix}tool0_to_${camera_name_value}_mount" type="fixed">
+    <parent link="${ur_tf_prefix}tool0"/>
+    <child link="${camera_name_value}_mount"/>
+    <origin xyz="$(arg camera_mount_xyz)" rpy="$(arg camera_mount_rpy)"/>
+  </joint>
+
+  <xacro:sensor_d455
+    parent="${camera_name_value}_mount"
+    name="$(arg camera_name)"
+    use_nominal_extrinsics="$(arg use_nominal_extrinsics)">
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </xacro:sensor_d455>
+</robot>
